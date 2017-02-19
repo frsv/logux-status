@@ -175,8 +175,7 @@ it('shows add and clean event', function () {
       .then(function () {
         expect(console.log).toBeCalledWith(
           'Logux: Action A was added to Logux',
-          '',
-          '',
+          '', '', '', '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
@@ -203,7 +202,7 @@ it('shows add and clean event and make action type bold', function () {
           'color: #ffa200',
           '',
           'font-weight: bold',
-          '',
+          '', '', '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
@@ -229,8 +228,10 @@ it('shows add event with action and make action type bold', function () {
     return test.leftSync.log.add({ type: 'B' }, { reasons: ['test'] })
   }).then(function () {
     expect(console.log).toBeCalledWith(
-      '%cLogux:%c test1 added action %cB%c to Logux',
+      '%cLogux:%c %ctest1%c added action %cB%c to Logux',
       'color: #ffa200',
+      '',
+      'font-weight: bold',
       '',
       'font-weight: bold',
       '',

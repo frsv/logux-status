@@ -77,13 +77,21 @@ function log (client, messages) {
     unbind.push(sync.log.on('add', function (action, meta) {
       var message
       var actionTypeString = stylePrefix + action.type + stylePrefix
+      var needAdditionalStyles = true
       if (meta.id[1] === sync.localNodeId) {
         message = 'Action ' + actionTypeString + ' was added to Logux'
+        needAdditionalStyles = false
       } else {
-        message = meta.id[1] + ' added action ' + actionTypeString + ' to Logux'
+        var metaString = stylePrefix + meta.id[1] + stylePrefix
+        message = metaString + ' added action ' + actionTypeString + ' to Logux'
       }
 
-      showMessage('log', message, boldStyle, '', action, meta)
+      showMessage(
+          'log', message,
+          boldStyle, '',
+          needAdditionalStyles ? boldStyle : '', '',
+          action, meta
+      )
     }))
   }
 
