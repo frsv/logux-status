@@ -1,26 +1,4 @@
-var browserSupportsLogStyles = require('./browser-supports-log-styles/')
-
-function showMessageFn (type) {
-  if (['error', 'log'].indexOf(type) === -1) type = 'log'
-
-  var args = Array.prototype.slice.call(arguments, 1)
-
-  if (browserSupportsLogStyles()) {
-    args.unshift('Logux: ')
-  } else {
-    args.unshift('%cLogux: ')
-    args.unshift('color: #ffa200')
-  }
-
-  console[type].apply(console, args)
-}
-
-function showError (error) {
-  var message = ''
-  if (error.received) message += 'server sent '
-  message += 'error: ' + error.description
-  showMessageFn('error', message)
-}
+var browserSupportsLogStyles = require('browser-supports-log-styles')
 
 /**
  * Display Logux events in browser console.
@@ -47,32 +25,40 @@ function log (client, messages) {
   var unbind = []
   var prevConnected = false
   var colorsEnabled = true
-  var showMessage = showMessageFn
   var stylePrefix = '%c'
+  var boldStyle = 'font-weight: bold'
 
-  if (!messages.color || !browserSupportsLogStyles()) {
+  if (messages.color === false || !browserSupportsLogStyles()) {
     colorsEnabled = false
-    showMessage = showMessageWithoutColorsFn
+    boldStyle = ''
     stylePrefix = ''
   }
 
   if (messages.state !== false) {
     unbind.push(sync.on('state', function () {
       var postfix = ''
+      var nodeIdString = ''
+      var syncStateString = stylePrefix + sync.state + stylePrefix
 
       if (sync.state === 'connecting' && sync.connection.url) {
-        postfix = '. ' + sync.localNodeId + ' is connecting to ' +
+        nodeIdString = stylePrefix + sync.localNodeId
+        postfix = '. ' + nodeIdString + ' is connecting to ' +
                   sync.connection.url + '.'
       }
 
       if (sync.connected && !prevConnected) {
-        postfix = '. Client was connected to ' + sync.remoteNodeId + '.'
+        nodeIdString = stylePrefix + sync.remoteNodeId
+        postfix = '. Client was connected to ' + nodeIdString + '.'
         prevConnected = true
       } else if (!sync.connected) {
         prevConnected = false
       }
 
-      showMessage('log', 'change state to ' + sync.state + postfix)
+      showMessage(
+          'log',
+          'change state to ' + syncStateString + postfix,
+          boldStyle, '', boldStyle
+      )
     }))
   }
 
@@ -88,22 +74,46 @@ function log (client, messages) {
   if (messages.add !== false) {
     unbind.push(sync.log.on('add', function (action, meta) {
       var message
+      var actionTypeString = stylePrefix + action.type + stylePrefix
       if (meta.id[1] === sync.localNodeId) {
-        message = 'Action ' + action.type + ' was added to Logux'
+        message = 'Action ' + actionTypeString + ' was added to Logux'
       } else {
-        message = meta.id[1] + ' added action ' + action.type + ' to Logux'
+        message = meta.id[1] + ' added action ' + actionTypeString + ' to Logux'
       }
-      showMessage('log', message, action, meta)
+
+      showMessage('log', message, boldStyle, action, meta)
     }))
   }
 
   if (messages.clean !== false) {
     unbind.push(sync.log.on('clean', function (action, meta) {
+      var actionTypeString = stylePrefix + action.type + stylePrefix
       showMessage(
-          'log',
-          'Action ' + action.type + ' was cleaned from Logux', action, meta
+        'log',
+        'Action ' + actionTypeString + ' was cleaned from Logux',
+        boldStyle, action, meta
       )
     }))
+  }
+
+  function showMessage (type) {
+    var args = Array.prototype.slice.call(arguments, 1)
+
+    if (colorsEnabled) {
+      args.unshift('color: #ffa200')
+      args.unshift('%cLogux: ')
+    } else {
+      args.unshift('Logux: ')
+    }
+
+    console[type].apply(console, args)
+  }
+
+  function showError (error) {
+    var message = ''
+    if (error.received) message += 'server sent '
+    message += 'error: ' + error.description
+    showMessage('error', message)
   }
 
   return function () {
