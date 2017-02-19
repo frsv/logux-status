@@ -1,8 +1,25 @@
+var browserSupportsLogStyles = require('./browser-supports-log-styles/')
+
+function showMessageFn (type) {
+  if (['error', 'log'].indexOf(type) === -1) type = 'log'
+
+  var args = Array.prototype.slice.call(arguments, 1)
+
+  if (browserSupportsLogStyles()) {
+    args.unshift('Logux: ')
+  } else {
+    args.unshift('%cLogux: ')
+    args.unshift('color: #ffa200')
+  }
+
+  console[type].apply(console, args)
+}
+
 function showError (error) {
-  var message = 'Logux '
+  var message = ''
   if (error.received) message += 'server sent '
   message += 'error: ' + error.description
-  console.error(message)
+  showMessageFn('error', message)
 }
 
 /**
@@ -15,6 +32,7 @@ function showError (error) {
  * @param {boolean} [messages.error] Disable error messages.
  * @param {boolean} [messages.add] Disable add messages.
  * @param {boolean} [messages.clean] Disable clean messages.
+ * @param {boolean} [messages.color] Disable colors in logs.
  *
  * @return {Function} Unbind log listener.
  *
@@ -28,6 +46,15 @@ function log (client, messages) {
 
   var unbind = []
   var prevConnected = false
+  var colorsEnabled = true
+  var showMessage = showMessageFn
+  var stylePrefix = '%c'
+
+  if (!messages.color || !browserSupportsLogStyles()) {
+    colorsEnabled = false
+    showMessage = showMessageWithoutColorsFn
+    stylePrefix = ''
+  }
 
   if (messages.state !== false) {
     unbind.push(sync.on('state', function () {
@@ -45,7 +72,7 @@ function log (client, messages) {
         prevConnected = false
       }
 
-      console.log('Logux change state to ' + sync.state + postfix)
+      showMessage('log', 'change state to ' + sync.state + postfix)
     }))
   }
 
@@ -66,14 +93,16 @@ function log (client, messages) {
       } else {
         message = meta.id[1] + ' added action ' + action.type + ' to Logux'
       }
-      console.log(message, action, meta)
+      showMessage('log', message, action, meta)
     }))
   }
 
   if (messages.clean !== false) {
     unbind.push(sync.log.on('clean', function (action, meta) {
-      var type = action.type
-      console.log('Action ' + type + ' was cleaned from Logux', action, meta)
+      showMessage(
+          'log',
+          'Action ' + action.type + ' was cleaned from Logux', action, meta
+      )
     }))
   }
 

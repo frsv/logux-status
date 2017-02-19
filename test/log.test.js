@@ -35,7 +35,7 @@ it('shows connecting state URL', function () {
     test.leftSync.connection.url = 'ws://ya.ru'
     test.leftSync.setState('connecting')
 
-    expect(console.log).toBeCalledWith('Logux change state to connecting. ' +
+    expect(console.log).toBeCalledWith('Logux: change state to connecting. ' +
       'test1 is connecting to ws://ya.ru.')
   })
 })
@@ -48,12 +48,12 @@ it('shows server node ID', function () {
     test.leftSync.connected = true
     test.leftSync.setState('synchronized')
 
-    expect(console.log).toBeCalledWith('Logux change state to synchronized. ' +
+    expect(console.log).toBeCalledWith('Logux: change state to synchronized. ' +
       'Client was connected to server.')
 
     test.leftSync.connected = false
     test.leftSync.setState('wait')
-    expect(console.log).toHaveBeenLastCalledWith('Logux change state to wait')
+    expect(console.log).toHaveBeenLastCalledWith('Logux: change state to wait')
   })
 })
 
@@ -64,7 +64,7 @@ it('shows state event', function () {
     test.leftSync.connected = false
     test.leftSync.emitter.emit('state')
 
-    expect(console.log).toBeCalledWith('Logux change state to disconnected')
+    expect(console.log).toBeCalledWith('Logux: change state to disconnected')
   })
 })
 
@@ -72,7 +72,7 @@ it('shows error event', function () {
   return createTest().then(function (test) {
     log({ sync: test.leftSync })
     test.left.emitter.emit('error', new SyncError(test.leftSync, 'test'))
-    expect(console.error).toBeCalledWith('Logux error: test')
+    expect(console.error).toBeCalledWith('Logux: error: test')
   })
 })
 
@@ -83,7 +83,7 @@ it('shows server error', function () {
     var error = new SyncError(test.leftSync, 'test', 'type', true)
     test.leftSync.emitter.emit('clientError', error)
 
-    expect(console.error).toBeCalledWith('Logux server sent error: test')
+    expect(console.error).toBeCalledWith('Logux: server sent error: test')
   })
 })
 
@@ -93,14 +93,14 @@ it('shows add and clean event', function () {
     return test.leftSync.log.add({ type: 'A' }, { reasons: ['test'] })
       .then(function () {
         expect(console.log).toBeCalledWith(
-          'Action A was added to Logux',
+          'Logux: Action A was added to Logux',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
         return test.leftSync.log.removeReason('test')
       }).then(function () {
         expect(console.log).toHaveBeenLastCalledWith(
-          'Action A was cleaned from Logux',
+          'Logux: Action A was cleaned from Logux',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: [], time: 1, added: 1 }
         )
@@ -115,7 +115,7 @@ it('shows add event with action from different node', function () {
     return test.leftSync.log.add({ type: 'B' }, { reasons: ['test'] })
   }).then(function () {
     expect(console.log).toBeCalledWith(
-      'test1 added action B to Logux',
+      'Logux: test1 added action B to Logux',
       { type: 'B' },
       { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
     )
