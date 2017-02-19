@@ -36,28 +36,30 @@ function log (client, messages) {
 
   if (messages.state !== false) {
     unbind.push(sync.on('state', function () {
+      var needAdditionalStyles = true
       var postfix = ''
       var nodeIdString = ''
       var syncStateString = stylePrefix + sync.state + stylePrefix
 
       if (sync.state === 'connecting' && sync.connection.url) {
-        nodeIdString = stylePrefix + sync.localNodeId
+        nodeIdString = stylePrefix + sync.localNodeId + stylePrefix
         postfix = '. ' + nodeIdString + ' is connecting to ' +
                   sync.connection.url + '.'
       }
 
       if (sync.connected && !prevConnected) {
-        nodeIdString = stylePrefix + sync.remoteNodeId
+        nodeIdString = stylePrefix + sync.remoteNodeId + stylePrefix
         postfix = '. Client was connected to ' + nodeIdString + '.'
         prevConnected = true
       } else if (!sync.connected) {
         prevConnected = false
+        if (!postfix) needAdditionalStyles = false
       }
 
       showMessage(
           'log',
           'change state to ' + syncStateString + postfix,
-          boldStyle, '', boldStyle
+          boldStyle, '', needAdditionalStyles ? boldStyle : '', ''
       )
     }))
   }
@@ -81,7 +83,7 @@ function log (client, messages) {
         message = meta.id[1] + ' added action ' + actionTypeString + ' to Logux'
       }
 
-      showMessage('log', message, boldStyle, action, meta)
+      showMessage('log', message, boldStyle, '', action, meta)
     }))
   }
 
@@ -91,7 +93,7 @@ function log (client, messages) {
       showMessage(
         'log',
         'Action ' + actionTypeString + ' was cleaned from Logux',
-        boldStyle, action, meta
+        boldStyle, '', action, meta
       )
     }))
   }
@@ -100,10 +102,11 @@ function log (client, messages) {
     var args = Array.prototype.slice.call(arguments, 1)
 
     if (colorsEnabled) {
-      args.unshift('color: #ffa200')
-      args.unshift('%cLogux: ')
+      args[0] = '%cLogux:%c ' + args[0]
+      args.splice(1, 0, 'color: #ffa200')
+      args.splice(2, 0, '')
     } else {
-      args.unshift('Logux: ')
+      args[0] = 'Logux: ' + args[0]
     }
 
     console[type].apply(console, args)

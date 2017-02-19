@@ -42,9 +42,8 @@ it('shows connecting state URL', function () {
     test.leftSync.setState('connecting')
 
     expect(console.log).toBeCalledWith(
-      'Logux: ',
-      'change state to connecting. test1 is connecting to ws://ya.ru.',
-      '', '', ''
+      'Logux: change state to connecting. test1 is connecting to ws://ya.ru.',
+      '', '', '', ''
     )
   })
 })
@@ -58,10 +57,14 @@ it('shows Logux prefix with color and make state and nodeId bold', function () {
     test.leftSync.setState('connecting')
 
     expect(console.log).toBeCalledWith(
-      '%cLogux: ',
+      '%cLogux:%c change state to %cconnecting%c. ' +
+      '%ctest1%c is connecting to ws://ya.ru.',
       'color: #ffa200',
-      'change state to %cconnecting%c. %ctest1 is connecting to ws://ya.ru.',
-      'font-weight: bold', '', 'font-weight: bold'
+      '',
+      'font-weight: bold',
+      '',
+      'font-weight: bold',
+      ''
     )
   })
 })
@@ -75,17 +78,46 @@ it('shows server node ID', function () {
     test.leftSync.setState('synchronized')
 
     expect(console.log).toBeCalledWith(
-      'Logux: ',
-      'change state to synchronized. ' +
+      'Logux: change state to synchronized. ' +
       'Client was connected to server.',
-      '', '', ''
+      '', '', '', ''
     )
 
     test.leftSync.connected = false
     test.leftSync.setState('wait')
     expect(console.log).toHaveBeenLastCalledWith(
-        'Logux: ',
-        'change state to wait',
+        'Logux: change state to wait',
+        '', '', '', ''
+    )
+  })
+})
+
+it('shows bold server node ID', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: true })
+
+    test.leftSync.remoteNodeId = 'server'
+    test.leftSync.connected = true
+    test.leftSync.setState('synchronized')
+
+    expect(console.log).toBeCalledWith(
+      '%cLogux:%c change state to %csynchronized%c. ' +
+      'Client was connected to %cserver%c.',
+      'color: #ffa200',
+      '',
+      'font-weight: bold',
+      '',
+      'font-weight: bold',
+      ''
+    )
+
+    test.leftSync.connected = false
+    test.leftSync.setState('wait')
+    expect(console.log).toHaveBeenLastCalledWith(
+        '%cLogux:%c change state to %cwait%c',
+        'color: #ffa200',
+        '',
+        'font-weight: bold',
         '', '', ''
     )
   })
@@ -99,9 +131,8 @@ it('shows state event', function () {
     test.leftSync.emitter.emit('state')
 
     expect(console.log).toBeCalledWith(
-        'Logux: ',
-        'change state to disconnected',
-        '', '', ''
+        'Logux: change state to disconnected',
+        '', '', '', ''
     )
   })
 })
@@ -110,7 +141,19 @@ it('shows error event', function () {
   return createTest().then(function (test) {
     log({ sync: test.leftSync }, { color: false })
     test.left.emitter.emit('error', new SyncError(test.leftSync, 'test'))
-    expect(console.error).toBeCalledWith('Logux: ', 'error: test')
+    expect(console.error).toBeCalledWith('Logux: error: test')
+  })
+})
+
+it('shows colorized error event', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: true })
+    test.left.emitter.emit('error', new SyncError(test.leftSync, 'test'))
+    expect(console.error).toBeCalledWith(
+        '%cLogux:%c error: test',
+        'color: #ffa200',
+        ''
+    )
   })
 })
 
@@ -121,7 +164,7 @@ it('shows server error', function () {
     var error = new SyncError(test.leftSync, 'test', 'type', true)
     test.leftSync.emitter.emit('clientError', error)
 
-    expect(console.error).toBeCalledWith('Logux: ', 'server sent error: test')
+    expect(console.error).toBeCalledWith('Logux: server sent error: test')
   })
 })
 
@@ -131,8 +174,8 @@ it('shows add and clean event', function () {
     return test.leftSync.log.add({ type: 'A' }, { reasons: ['test'] })
       .then(function () {
         expect(console.log).toBeCalledWith(
-          'Logux: ',
-          'Action A was added to Logux',
+          'Logux: Action A was added to Logux',
+          '',
           '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
@@ -140,8 +183,8 @@ it('shows add and clean event', function () {
         return test.leftSync.log.removeReason('test')
       }).then(function () {
         expect(console.log).toHaveBeenLastCalledWith(
-          'Logux: ',
-          'Action A was cleaned from Logux',
+          'Logux: Action A was cleaned from Logux',
+          '',
           '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: [], time: 1, added: 1 }
@@ -156,20 +199,22 @@ it('shows add and clean event and make action type bold', function () {
     return test.leftSync.log.add({ type: 'A' }, { reasons: ['test'] })
       .then(function () {
         expect(console.log).toBeCalledWith(
-          '%cLogux: ',
+          '%cLogux:%c Action %cA%c was added to Logux',
           'color: #ffa200',
-          'Action %cA%c was added to Logux',
+          '',
           'font-weight: bold',
+          '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
         return test.leftSync.log.removeReason('test')
       }).then(function () {
         expect(console.log).toHaveBeenLastCalledWith(
-          '%cLogux: ',
+          '%cLogux:%c Action %cA%c was cleaned from Logux',
           'color: #ffa200',
-          'Action %cA%c was cleaned from Logux',
+          '',
           'font-weight: bold',
+          '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: [], time: 1, added: 1 }
         )
@@ -184,10 +229,11 @@ it('shows add event with action and make action type bold', function () {
     return test.leftSync.log.add({ type: 'B' }, { reasons: ['test'] })
   }).then(function () {
     expect(console.log).toBeCalledWith(
-      '%cLogux: ',
+      '%cLogux:%c test1 added action %cB%c to Logux',
       'color: #ffa200',
-      'test1 added action %cB%c to Logux',
+      '',
       'font-weight: bold',
+      '',
       { type: 'B' },
       { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
     )

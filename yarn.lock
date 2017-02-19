@@ -420,6 +420,10 @@ browser-resolve@^1.11.2:
   dependencies:
     resolve "1.1.7"
 
+browser-supports-log-styles@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/browser-supports-log-styles/-/browser-supports-log-styles-1.1.5.tgz#205ca1ba13c4958acded5ef73633fdeed25e8d13"
+
 browserify-aes@^1.0.0, browserify-aes@^1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/browserify-aes/-/browserify-aes-1.0.6.tgz#5e7725dbdef1fd5930d4ebab48567ce451c48a0a"
