@@ -42,8 +42,8 @@ it('shows connecting state URL', function () {
     test.leftSync.setState('connecting')
 
     expect(console.log).toBeCalledWith(
-      'Logux: change state to connecting. test1 is connecting to ws://ya.ru.',
-      '', '', '', ''
+      'Logux: state was changed to connecting. ' +
+      'test1 is connecting to ws://ya.ru.'
     )
   })
 })
@@ -57,9 +57,11 @@ it('shows Logux prefix with color and make state and nodeId bold', function () {
     test.leftSync.setState('connecting')
 
     expect(console.log).toBeCalledWith(
-      '%cLogux:%c change state to %cconnecting%c. ' +
-      '%ctest1%c is connecting to ws://ya.ru.',
+      '%cLogux:%c state was changed to %cconnecting%c. ' +
+      '%ctest1%c is connecting to %cws://ya.ru%c.',
       'color: #ffa200',
+      '',
+      'font-weight: bold',
       '',
       'font-weight: bold',
       '',
@@ -78,16 +80,14 @@ it('shows server node ID', function () {
     test.leftSync.setState('synchronized')
 
     expect(console.log).toBeCalledWith(
-      'Logux: change state to synchronized. ' +
-      'Client was connected to server.',
-      '', '', '', ''
+      'Logux: state was changed to synchronized. ' +
+      'Client was connected to server.'
     )
 
     test.leftSync.connected = false
     test.leftSync.setState('wait')
     expect(console.log).toHaveBeenLastCalledWith(
-        'Logux: change state to wait',
-        '', '', '', ''
+        'Logux: state was changed to wait'
     )
   })
 })
@@ -101,7 +101,7 @@ it('shows bold server node ID', function () {
     test.leftSync.setState('synchronized')
 
     expect(console.log).toBeCalledWith(
-      '%cLogux:%c change state to %csynchronized%c. ' +
+      '%cLogux:%c state was changed to %csynchronized%c. ' +
       'Client was connected to %cserver%c.',
       'color: #ffa200',
       '',
@@ -114,11 +114,11 @@ it('shows bold server node ID', function () {
     test.leftSync.connected = false
     test.leftSync.setState('wait')
     expect(console.log).toHaveBeenLastCalledWith(
-        '%cLogux:%c change state to %cwait%c',
+        '%cLogux:%c state was changed to %cwait%c',
         'color: #ffa200',
         '',
         'font-weight: bold',
-        '', '', ''
+        ''
     )
   })
 })
@@ -131,8 +131,7 @@ it('shows state event', function () {
     test.leftSync.emitter.emit('state')
 
     expect(console.log).toBeCalledWith(
-        'Logux: change state to disconnected',
-        '', '', '', ''
+        'Logux: state was changed to disconnected'
     )
   })
 })
@@ -168,23 +167,36 @@ it('shows server error', function () {
   })
 })
 
+it('shows bold server error', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: true })
+
+    var error = new SyncError(test.leftSync, 'test', 'type', true)
+    test.leftSync.emitter.emit('clientError', error)
+
+    expect(console.error).toBeCalledWith(
+        '%cLogux:%c server sent error: test',
+        'color: #ffa200',
+        ''
+    )
+  })
+})
+
 it('shows add and clean event', function () {
   return createTest().then(function (test) {
     log({ sync: test.leftSync }, { color: false })
     return test.leftSync.log.add({ type: 'A' }, { reasons: ['test'] })
       .then(function () {
         expect(console.log).toBeCalledWith(
-          'Logux: Action A was added to Logux',
-          '', '', '', '',
+          'Logux: action A was added',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
         return test.leftSync.log.removeReason('test')
       }).then(function () {
         expect(console.log).toHaveBeenLastCalledWith(
-          'Logux: Action A was cleaned from Logux',
-          '',
-          '',
+          'Logux: action A was cleaned',
+          '', '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: [], time: 1, added: 1 }
         )
@@ -198,18 +210,18 @@ it('shows add and clean event and make action type bold', function () {
     return test.leftSync.log.add({ type: 'A' }, { reasons: ['test'] })
       .then(function () {
         expect(console.log).toBeCalledWith(
-          '%cLogux:%c Action %cA%c was added to Logux',
+          '%cLogux:%c action %cA%c was added',
           'color: #ffa200',
           '',
           'font-weight: bold',
-          '', '', '',
+          '',
           { type: 'A' },
           { id: [1, 'test1', 0], reasons: ['test'], time: 1, added: 1 }
         )
         return test.leftSync.log.removeReason('test')
       }).then(function () {
         expect(console.log).toHaveBeenLastCalledWith(
-          '%cLogux:%c Action %cA%c was cleaned from Logux',
+          '%cLogux:%c action %cA%c was cleaned',
           'color: #ffa200',
           '',
           'font-weight: bold',
@@ -228,7 +240,7 @@ it('shows add event with action and make action type bold', function () {
     return test.leftSync.log.add({ type: 'B' }, { reasons: ['test'] })
   }).then(function () {
     expect(console.log).toBeCalledWith(
-      '%cLogux:%c %ctest1%c added action %cB%c to Logux',
+      '%cLogux:%c %ctest1%c added action %cB%c',
       'color: #ffa200',
       '',
       'font-weight: bold',

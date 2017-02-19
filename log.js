@@ -36,31 +36,36 @@ function log (client, messages) {
 
   if (messages.state !== false) {
     unbind.push(sync.on('state', function () {
-      var needAdditionalStyles = true
       var postfix = ''
       var nodeIdString = ''
       var syncStateString = stylePrefix + sync.state + stylePrefix
+      var connectionUrlString = stylePrefix + sync.connection.url + stylePrefix
+      var stylesCount = 1
 
       if (sync.state === 'connecting' && sync.connection.url) {
         nodeIdString = stylePrefix + sync.localNodeId + stylePrefix
         postfix = '. ' + nodeIdString + ' is connecting to ' +
-                  sync.connection.url + '.'
+                  connectionUrlString + '.'
+        stylesCount += 2
       }
 
       if (sync.connected && !prevConnected) {
         nodeIdString = stylePrefix + sync.remoteNodeId + stylePrefix
         postfix = '. Client was connected to ' + nodeIdString + '.'
         prevConnected = true
+        stylesCount++
       } else if (!sync.connected) {
         prevConnected = false
-        if (!postfix) needAdditionalStyles = false
       }
 
-      showMessage(
-          'log',
-          'change state to ' + syncStateString + postfix,
-          boldStyle, '', needAdditionalStyles ? boldStyle : '', ''
-      )
+      var args = ['log', 'state was changed to ' + syncStateString + postfix]
+      if (colorsEnabled) {
+        for (var i = 0; i < stylesCount; i++) {
+          args.push(boldStyle, '')
+        }
+      }
+
+      showMessage.apply(log, args)
     }))
   }
 
@@ -77,21 +82,24 @@ function log (client, messages) {
     unbind.push(sync.log.on('add', function (action, meta) {
       var message
       var actionTypeString = stylePrefix + action.type + stylePrefix
-      var needAdditionalStyles = true
+      var stylesCount = 1
       if (meta.id[1] === sync.localNodeId) {
-        message = 'Action ' + actionTypeString + ' was added to Logux'
-        needAdditionalStyles = false
+        message = 'action ' + actionTypeString + ' was added'
       } else {
         var metaString = stylePrefix + meta.id[1] + stylePrefix
-        message = metaString + ' added action ' + actionTypeString + ' to Logux'
+        message = metaString + ' added action ' + actionTypeString
+        stylesCount++
       }
 
-      showMessage(
-          'log', message,
-          boldStyle, '',
-          needAdditionalStyles ? boldStyle : '', '',
-          action, meta
-      )
+      var args = ['log', message]
+      if (colorsEnabled) {
+        for (var i = 0; i < stylesCount; i++) {
+          args.push(boldStyle, '')
+        }
+      }
+      args.push(action, meta)
+
+      showMessage.apply(log, args)
     }))
   }
 
@@ -100,7 +108,7 @@ function log (client, messages) {
       var actionTypeString = stylePrefix + action.type + stylePrefix
       showMessage(
         'log',
-        'Action ' + actionTypeString + ' was cleaned from Logux',
+        'action ' + actionTypeString + ' was cleaned',
         boldStyle, '', action, meta
       )
     }))
