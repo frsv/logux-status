@@ -9,6 +9,7 @@
     "BaseSync",
     "Syncable",
     "UX",
-    "favicon"
+    "favicon",
+    "colorized"
   ]
 }
