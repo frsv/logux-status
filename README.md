@@ -147,6 +147,13 @@ Possible types are: `state`, `error`, `add`, `clean`.
 log(client, { add: false })
 ```
 
+Logux events in browser console are colorized by default, if console styling is supported by browser.
+To disable this feature, set `color` to false in the second argument.
+
+```js
+log(client, { color: false })
+```
+
 It return a function to disable itself.
 
 ```js
