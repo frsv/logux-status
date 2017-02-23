@@ -182,6 +182,46 @@ it('shows bold server error', function () {
   })
 })
 
+it('shows server debug message', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: false })
+
+    test.leftSync.emitter.emit('debug', 'error', 'Fake stacktrace\n')
+
+    expect(console.error).toBeCalledWith(
+        'Logux: server sent error:\nFake stacktrace\n'
+    )
+  })
+})
+
+it('does not show server debug message if type is not error', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: true })
+
+    test.leftSync.emitter.emit(
+        'debug',
+        'definitely_not_error',
+        'Fake stacktrace\n'
+    )
+
+    expect(console.error).not.toHaveBeenCalled()
+  })
+})
+
+it('shows bold server debug message', function () {
+  return createTest().then(function (test) {
+    log({ sync: test.leftSync }, { color: true })
+
+    test.leftSync.emitter.emit('debug', 'error', 'Fake stacktrace\n')
+
+    expect(console.error).toBeCalledWith(
+        '%cLogux:%c server sent error:\nFake stacktrace\n',
+        'color: #ffa200',
+        ''
+    )
+  })
+})
+
 it('shows add and clean event', function () {
   return createTest().then(function (test) {
     log({ sync: test.leftSync }, { color: false })

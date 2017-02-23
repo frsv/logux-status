@@ -65,6 +65,11 @@ function log (client, messages) {
     console.error.apply(console, colorify(color, text))
   }
 
+  function showServerStacktrace (stack) {
+    var text = 'server sent error:\n' + stack
+    console.error.apply(console, colorify(color, text))
+  }
+
   var unbind = []
   var prevConnected = false
 
@@ -94,6 +99,11 @@ function log (client, messages) {
     }))
     unbind.push(sync.on('clientError', function (error) {
       showError(error)
+    }))
+    unbind.push(sync.on('debug', function (type, stack) {
+      if (type === 'error') {
+        showServerStacktrace(stack)
+      }
     }))
   }
 
