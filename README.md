@@ -57,6 +57,10 @@ function disableLogux() {
 }
 ```
 
+Example:
+
+![Logux attention example](https://git.io/vyT1f)
+
 
 ## `confirm`
 
@@ -84,6 +88,10 @@ function disableLogux() {
   unbind()
 }
 ```
+
+Example:
+
+![Logux confirm example](https://git.io/vyTXW)
 
 
 ## `favicon`
@@ -127,6 +135,19 @@ function disableLogux() {
 }
 ```
 
+Examples:
+
+Online state
+
+![Logux favicon online example](https://git.io/vyT1V)
+
+Offline state
+
+![Logux favicon offline example](https://git.io/vyT1o)
+
+Error state
+
+![Logux favicon error example](https://git.io/vyT1K)
 
 ## `log`
 
@@ -162,3 +183,7 @@ function disableLogux() {
   unbind()
 }
 ```
+
+Example:
+
+![Logux log example](https://git.io/vyT1l)
